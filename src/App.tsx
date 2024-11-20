@@ -54,9 +54,9 @@ function App() {
         </div>
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Analisis Perjalanan per Jam</CardTitle>
+            <CardTitle>Analisis Total Perjalanan </CardTitle>
             <CardDescription>
-              Rata-rata tarif dan jumlah perjalanan
+              Total Perjalanan Perbulan Beserta total pembayaran perbulan
             </CardDescription>
           </CardHeader>
           <CardContent>
