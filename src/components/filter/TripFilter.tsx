@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,19 +8,21 @@ import {
 import { Input } from "../ui/input";
 import useTripFilter from "../../hooks/useTripFilter";
 
+interface Filter {
+  fareAmount?: number;
+  paymentType: string;
+  pickupDatetime: string;
+  dropoffDatetime: string;
+  minDistance: string;
+  maxDistance: string;
+}
+
 interface TripFilterProps {
-  onFilterChange?: (filter: {
-    fareAmount: number;
-    paymentType: string;
-    pickupDatetime: string;
-    dropoffDatetime: string;
-    minDistance: string;
-    maxDistance: string;
-  }) => void;
+  onFilterChange?: (filter: Filter) => void;
 }
 
 export default function TripFilter(props: TripFilterProps) {
-    const { filter, setFilter } = useTripFilter(props.onFilterChange);
+    const { filter, setFilter } = useTripFilter(props.onFilterChange as any);
 
   return (
     <div className="space-y-4">
