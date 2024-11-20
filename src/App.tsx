@@ -6,13 +6,20 @@ import {
   CardTitle
 } from "@/components/ui/card";
 
-import TaxiMap from '@/components/map/TaxiMap'
-import TripFilter from '@/components/filter/TripFilter'
-import TripAnalysisChart from '@/components/chart/TripAnalysisChart'
+import TaxiMap from "@/components/map/TaxiMap";
+import TripFilter from "@/components/filter/TripFilter";
+import TripAnalysisChart from "@/components/chart/TripAnalysisChart";
+import { useState } from "react";
 
+const MAPBOX_ACESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string;
 
-const MAPBOX_ACESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN as string
 function App() {
+  const [filterData, setFilterData] = useState(null);
+
+  const handleFilterChange = (data: any) => {
+    setFilterData(data);
+  };
+
   return (
     <>
       <div className="container mx-auto p-4">
@@ -26,7 +33,10 @@ function App() {
               <CardDescription>Visualisasi rute perjalanan</CardDescription>
             </CardHeader>
             <CardContent>
-                <TaxiMap MAPBOX_ACCESS_TOKEN={MAPBOX_ACESS_TOKEN} />
+              <TaxiMap
+                MAPBOX_ACCESS_TOKEN={MAPBOX_ACESS_TOKEN}
+                filterData={filterData}
+              />
             </CardContent>
           </Card>
 
@@ -38,7 +48,7 @@ function App() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-                <TripFilter />
+              <TripFilter onFilterChange={handleFilterChange} />
             </CardContent>
           </Card>
         </div>

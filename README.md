@@ -1,53 +1,11 @@
 # React + TypeScript + Vite
 
-Template ini menyediakan setup minimal untuk menjalankan React di Vite dengan HMR dan beberapa aturan ESLint.
+Proyek ini menggunakan beberapa teknologi dan pustaka untuk membangun aplikasi yang kaya fitur:
 
-Saat ini, dua plugin resmi tersedia:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) menggunakan [Babel](https://babeljs.io/) untuk Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) menggunakan [SWC](https://swc.rs/) untuk Fast Refresh
-
-## Memperluas konfigurasi ESLint
-
-Jika Anda mengembangkan aplikasi produksi, kami merekomendasikan untuk memperbarui konfigurasi untuk mengaktifkan aturan lint yang sadar tipe:
-
-- Konfigurasikan properti `parserOptions` tingkat atas seperti ini:
-
-
-export default tseslint.config({
-  languageOptions: {
-    // opsi lain...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-
-
-- Ganti `tseslint.configs.recommended` dengan `tseslint.configs.recommendedTypeChecked` atau `tseslint.configs.strictTypeChecked`
-- Opsional tambahkan `...tseslint.configs.stylisticTypeChecked`
-- Instal [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) dan perbarui konfigurasi:
-
-
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Setel versi react
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Tambahkan plugin react
-    react,
-  },
-  rules: {
-    // aturan lain...
-    // Aktifkan aturan yang direkomendasikan
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-
+- **Tailwind CSS**: Digunakan untuk styling yang cepat dan responsif.
+- **Mapbox**: Digunakan untuk menampilkan peta interaktif dalam aplikasi.
+- **Recharts**: Digunakan untuk membuat grafik dan visualisasi data yang menarik.
+- **Chadcn**: Sebuah pustaka yang mungkin digunakan dalam proyek ini untuk komponen UI atau fungsionalitas tambahan.
 
 ## Menjalankan Proyek
 
@@ -57,11 +15,10 @@ Untuk menjalankan proyek ini, ikuti langkah-langkah berikut:
 
    npm install
 
-
-2. Tambahkan file `.env` di root proyek Anda dan masukkan `MAPBOX_ACCESS_TOKEN` Anda:
+2. Salin file `.env.example` di root proyek Anda menjadi `.env` dan wajib diisi dengan `MAPBOX_ACCESS_TOKEN` & `API_URL` Anda:
 
    MAPBOX_ACCESS_TOKEN=your_mapbox_access_token_here
-
+   API_URL=backend url
 
 3. Jalankan proyek dengan perintah:
 

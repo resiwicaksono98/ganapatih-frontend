@@ -1,77 +1,117 @@
-import { useState } from "react";
-
-import { Slider } from "@/components/ui/slider";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select";
+} from "../../components/ui/select";
+import { Input } from "../ui/input";
+import useTripFilter from "../../hooks/useTripFilter";
 
-export default function TripFilter() {
-  const [fareRange, setFareRange] = useState([0, 200000]);
-  const [paymentType, setPaymentType] = useState("all");
-  const [timeRange, setTimeRange] = useState(["00:00", "23:59"]);
-  const [distanceRange, setDistanceRange] = useState([0, 50]);
+interface TripFilterProps {
+  onFilterChange?: (filter: {
+    fareAmount: number;
+    paymentType: string;
+    pickupDatetime: string;
+    dropoffDatetime: string;
+    minDistance: string;
+    maxDistance: string;
+  }) => void;
+}
+
+export default function TripFilter(props: TripFilterProps) {
+    const { filter, setFilter } = useTripFilter(props.onFilterChange);
 
   return (
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium mb-1">Rentang Tarif</label>
-        <Slider
-          value={fareRange}
-          onValueChange={setFareRange}
-          min={0}
-          max={200000}
-          step={1}
+        <Input
+          type="number"
+          onKeyUp={(event) => {
+            const value = parseInt(event.currentTarget.value, 10);
+            setFilter({
+              ...filter,
+              fareAmount: isNaN(value) ? undefined : value
+            });
+          }}
+          placeholder="$"
         />
-        <div className="text-sm text-gray-500 mt-1">
-          Rp.{fareRange[0]} - Rp.{fareRange[1]}
-        </div>
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">Rentang Waktu</label>
-        <Slider
-          value={timeRange.map((time) => parseInt(time.split(":")[0], 10))}
-          onValueChange={(values) =>
-            setTimeRange(values.map((value) => `${value}:00`))
-          }
-          min={0}
-          max={23}
-          step={1}
-        />
-        <div className="text-sm text-gray-500 mt-1">
-          {timeRange[0]} - {timeRange[1]}
+        <div className="flex items-center space-x-2">
+          <Input
+            type="date"
+            value={filter.pickupDatetime}
+            onChange={(event) => {
+              setFilter({
+                ...filter,
+                pickupDatetime: event.target.value
+              });
+            }}
+          />
+          <span>-</span>
+          <Input
+            type="date"
+            value={filter.dropoffDatetime}
+            onChange={(event) => {
+              setFilter({
+                ...filter,
+                dropoffDatetime: event.target.value
+              });
+            }}
+          />
         </div>
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">
           Rentang Jarak (km)
         </label>
-        <Slider
-          value={distanceRange}
-          onValueChange={setDistanceRange}
-          min={0}
-          max={50}
-          step={1}
-        />
-        <div className="text-sm text-gray-500 mt-1">
-          {distanceRange[0]} - {distanceRange[1]} km
+        <div className="flex items-center space-x-2">
+          <Input
+            type="number"
+            value={filter.minDistance}
+            onChange={(event) => {
+              setFilter({
+                ...filter,
+                minDistance: event.target.value
+              });
+            }}
+            placeholder="Min Distance"
+          />
+          <span>-</span>
+          <Input
+            type="number"
+            value={filter.maxDistance}
+            onChange={(event) => {
+              setFilter({
+                ...filter,
+                maxDistance: event.target.value
+              });
+            }}
+            placeholder="Max distance"
+          />
         </div>
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">
           Jenis Pembayaran
         </label>
-        <Select value={paymentType} onValueChange={setPaymentType}>
+        <Select
+          value={filter.paymentType}
+          onValueChange={(value) =>
+            setFilter({ ...filter, paymentType: value })
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Pilih jenis pembayaran" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua</SelectItem>
-            <SelectItem value="cash">Tunai</SelectItem>
-            <SelectItem value="card">Kartu</SelectItem>
+            <SelectItem value="CSH">Cash</SelectItem>
+            <SelectItem value="CRD">Credit</SelectItem>
           </SelectContent>
         </Select>
       </div>

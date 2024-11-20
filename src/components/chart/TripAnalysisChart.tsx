@@ -1,55 +1,87 @@
-
+import { useEffect, useState } from "react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Legend,
   ResponsiveContainer
 } from "recharts";
-
-import { aggregatedData } from "../../data/aggregatedData";
+import { fetchDiagramMonthlyTrip } from "../../api/trips";
 
 export default function TripAnalysisChart() {
+  const [aggregatedData, setAggregatedData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadTrips() {
+      try {
+        const trips = await fetchDiagramMonthlyTrip();
+        const sortedTrips = trips.monthlyTotals.sort(
+          (a: { month: string }, b: { month: string }) =>
+            new Date(a.month).getTime() - new Date(b.month).getTime()
+        );
+        setAggregatedData(sortedTrips);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadTrips();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <ChartContainer
       config={{
-        avgFare: {
-          label: "Rata-rata Tarif",
+        totalTrip: {
+          label: "Total Trip",
           color: "hsl(var(--chart-1))"
         },
-        tripCount: {
-          label: "Jumlah Perjalanan",
+        totalPaymentTypeCash: {
+          label: "Total Payment Type Cash",
           color: "hsl(var(--chart-2))"
+        },
+        totalPaymentTypeCRD: {
+          label: "Total Payment Type CRD",
+          color: "hsl(var(--chart-3))"
         }
       }}
       className="h-[300px] w-full"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={aggregatedData}>
+        <BarChart width={730} height={250} data={aggregatedData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="hour" />
-          <YAxis yAxisId="left" />
+          <XAxis dataKey="month" />
+          <YAxis yAxisId="left" orientation="left" />
           <YAxis yAxisId="right" orientation="right" />
           <ChartTooltip content={<ChartTooltipContent />} />
           <Legend />
-          <Line
+          <Bar
             yAxisId="left"
-            type="monotone"
-            dataKey="avgFare"
-            stroke="var(--color-avgFare)"
-            name="Rata-rata Tarif"
+            dataKey="totalTrips"
+            fill="hsl(var(--chart-1))"
+            name="Total Trip"
           />
-          <Line
+          <Bar
             yAxisId="right"
-            type="monotone"
-            dataKey="tripCount"
-            stroke="var(--color-tripCount)"
-            name="Jumlah Perjalanan"
+            dataKey="totalPaymentTypeCSH"
+            fill="hsl(var(--chart-2))"
+            name="Payment Cash"
           />
-        </LineChart>
+          <Bar
+            yAxisId="right"
+            dataKey="totalPaymentTypeCRD"
+            fill="hsl(var(--chart-3))"
+            name="Payment Credit"
+          />
+        </BarChart>
       </ResponsiveContainer>
     </ChartContainer>
   );

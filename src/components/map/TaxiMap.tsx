@@ -1,31 +1,43 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Layer, Map, Marker, Source } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { tripData } from "../../data/tripData";
-import useFetchRoutes from '@/hooks/useFetchRoutes'
+import { HoveredRoute, Trip } from "../../types/map";
+import { fetchTrips } from "../../api/trips";
+import { createRoutesGeoJSON } from "../../utils/geojson";
 
-export default function TaxiMap({ MAPBOX_ACCESS_TOKEN }: { MAPBOX_ACCESS_TOKEN: string }) {
+export default function TaxiMap({
+  MAPBOX_ACCESS_TOKEN,
+  filterData
+}: {
+  MAPBOX_ACCESS_TOKEN: string;
+  filterData: any;
+}) {
   const [viewport, setViewport] = useState({
-    latitude: tripData[0].pickup[1],
-    longitude: tripData[0].pickup[0],
-    zoom: 15
+    latitude: 40.7128,
+    longitude: -74.006,
+    zoom: 10
   });
-  const [hoveredRoute, setHoveredRoute] = useState<any>(null);
-  const routes = useFetchRoutes(MAPBOX_ACCESS_TOKEN)
+  const [tripData, setTripData] = useState<Trip[]>([]);
+  const [hoveredRoute, setHoveredRoute] = useState<HoveredRoute | null>(null);
+  const [hoveredRouteId, setHoveredRouteId] = useState<string | null>(null);
 
+  useEffect(() => {
+    async function loadTrips() {
+      try {
+        const trips = await fetchTrips(filterData);
+        setTripData(trips);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    loadTrips();
+  }, [filterData]);
 
-  const routesGeoJSON = useMemo(() => {
-    return {
-      type: "FeatureCollection",
-      features: routes.map((route, index) => ({
-        type: "Feature",
-        properties: {
-          id: tripData[index].id
-        },
-        geometry: route
-      }))
-    };
-  }, [routes]);
+  const routesGeoJSON = useMemo(
+    () => createRoutesGeoJSON(tripData),
+    [tripData]
+  );
+
   return (
     <>
       <Map
@@ -38,11 +50,26 @@ export default function TaxiMap({ MAPBOX_ACCESS_TOKEN }: { MAPBOX_ACCESS_TOKEN: 
         onMouseMove={(event) => {
           const feature = event.features && event.features[0];
           if (feature) {
-            setHoveredRoute(
-              tripData.find((trip) => trip.id === feature.properties?.id)
+            const route = tripData.find(
+              (trip) => trip.id === feature.properties?.id
             );
+            if (route) {
+              setHoveredRoute({
+                id: route.id,
+                fare: route.fare,
+                distance: route.distance,
+                time: route.time,
+                x: event.point.x,
+                y: event.point.y
+              });
+              setHoveredRouteId(route.id);
+            } else {
+              setHoveredRoute(null);
+              setHoveredRouteId(null);
+            }
           } else {
             setHoveredRoute(null);
+            setHoveredRouteId(null);
           }
         }}
       >
@@ -55,11 +82,17 @@ export default function TaxiMap({ MAPBOX_ACCESS_TOKEN }: { MAPBOX_ACCESS_TOKEN: 
               "line-cap": "round"
             }}
             paint={{
-              "line-color": "#007cbf",
+              "line-color": [
+                "case",
+                ["==", ["get", "id"], hoveredRouteId],
+                "#ff0000",
+                "#007cbf"
+              ],
               "line-width": 5
             }}
           />
         </Source>
+
         {tripData.map((trip, index) => (
           <React.Fragment key={index}>
             <Marker
@@ -75,12 +108,16 @@ export default function TaxiMap({ MAPBOX_ACCESS_TOKEN }: { MAPBOX_ACCESS_TOKEN: 
           </React.Fragment>
         ))}
       </Map>
+
       {hoveredRoute && (
-        <div className="absolute bg-white p-2 shadow-md">
+        <div
+          className="absolute bg-white p-2 shadow-md"
+          style={{ left: `${hoveredRoute.x}px`, top: `${hoveredRoute.y}px` }}
+        >
           <div>ID: {hoveredRoute.id}</div>
-          <div>Fare: {hoveredRoute.fare}</div>
+          <div>Fare: ${hoveredRoute.fare}</div>
           <div>Distance: {hoveredRoute.distance} km</div>
-          <div>Time: {hoveredRoute.time}</div>
+          <div>Time: {new Date(hoveredRoute.time).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric' })}</div>
         </div>
       )}
     </>
